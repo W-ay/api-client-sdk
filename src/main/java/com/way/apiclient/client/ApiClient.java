@@ -30,21 +30,21 @@ public class ApiClient {
 
     }
 
-    private String getNameByGet(String username) {
+    public String getNameByGet(String username) {
         HashMap<String, Object> map = new HashMap<>();
         map.put("username", username);
         String result = HttpUtil.get("http://localhost:8123/api/name", map);
         return result;
     }
 
-    private String getNameByPost(String username) {
+    public String getNameByPost(String username) {
         HashMap<String, Object> map = new HashMap<>();
         map.put("username", username);
         String result = HttpUtil.post("http://localhost:8123/api/name", map);
         return result;
     }
 
-    private String getNameByPost(User user) {
+    public String getNameByPost(User user) {
         String json = JSONUtil.toJsonStr(user);
         HttpResponse response = HttpRequest.post("http://localhost:8123/api/name/json")
                 .addHeaders(getHeaderMap(json))
@@ -53,11 +53,11 @@ public class ApiClient {
         return response.body();
     }
 
-    private HashMap<String, String> getHeaderMap(String body) {
+    public HashMap<String, String> getHeaderMap(String body) {
         HashMap<String, String> headerMap = new HashMap<>();
         headerMap.put("accessKey", accessKey);
-        //todo 随机数的作用？  存入redis？
-        headerMap.put("nonce", RandomUtil.randomNumbers(4));
+        String nonce = HttpUtil.get("http://localhost:8123/api/name/nonce");
+        headerMap.put("nonce", nonce);
         headerMap.put("timestamp", String.valueOf(System.currentTimeMillis()));
         headerMap.put("sign", SignUtils.getSign(headerMap, secretKey, body));
         return headerMap;
