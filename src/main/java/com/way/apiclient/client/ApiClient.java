@@ -1,11 +1,8 @@
 package com.way.apiclient.client;
 
 import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
-import cn.hutool.json.JSONUtil;
-import com.way.apiclient.model.User;
-import com.way.dubbointerface.utils.SignUtils;
+import com.way.apiclient.utils.SignUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -31,33 +28,10 @@ public class ApiClient {
 
     }
 
-    public String getNameByGet(String username) {
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("username", username);
-        String result = HttpUtil.get(HOST + "/api2/name", map);
-        return result;
-    }
-
-    public String getNameByPost(String username) {
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("username", username);
-        String result = HttpUtil.post(HOST + "/api2/name", map);
-        return result;
-    }
-
-    public String getNameByPost(User user) {
-        String json = JSONUtil.toJsonStr(user);
-        HttpResponse response = HttpRequest.post(HOST + "/api2/name/json")
-                .addHeaders(getHeaderMap(json))
-                .body(json)
-                .execute();
-        return response.body();
-    }
-
     public HashMap<String, String> getHeaderMap(String body) {
         HashMap<String, String> headerMap = new HashMap<>();
-        headerMap.put("accessKey", accessKey);
         String nonce = HttpUtil.get(HOST + "/api2/name/nonce");
+        headerMap.put("accessKey", accessKey);
         headerMap.put("nonce", nonce);
         headerMap.put("timestamp", String.valueOf(System.currentTimeMillis()));
         headerMap.put("sign", SignUtils.getSign(headerMap, secretKey, null));
@@ -65,6 +39,7 @@ public class ApiClient {
     }
 
     public String invokeInterface(String url, String params, String method) {
+        //todo 修改签名认证算法
         String resp = null;
         if (StringUtils.equalsIgnoreCase(method, "GET")) {
             resp = HttpRequest.get(url + "?" + params)
@@ -80,7 +55,7 @@ public class ApiClient {
                     .execute()
                     .body();
         }else {
-            throw new RuntimeException("使用了非法的请求方法");
+            throw new RuntimeException("使用了不支持的请求方法");
         }
         return resp;
     }
